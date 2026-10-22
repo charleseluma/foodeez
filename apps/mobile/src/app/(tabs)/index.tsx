@@ -24,7 +24,7 @@ export default function DiscoverScreen() {
     <Screen>
       <Eyebrow>Discover Foodeez</Eyebrow>
       <Title>What are you hungry to experience?</Title>
-      <Body muted>Private dinners, tastings and chef's tables near you.</Body>
+      <Body muted>Private dinners, tastings and chef&apos;s tables near you.</Body>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
         {filters.map((f) => (

@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Link from "next/link";
+import { getSession } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Foodeez — Experience food together",
   description: "Discover private dinners, tastings, chefs, and intentional food experiences.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { user } = await getSession();
   return (
     <html lang="en">
       <body>
@@ -17,8 +19,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <nav className="nav-links" aria-label="Primary navigation">
               <Link href="/discover">Discover</Link>
               <Link href="/discover">Experiences</Link>
-              <Link href="/chefs/andre-williams">Meet a Chef</Link>
-              <Link href="/discover" className="btn btn-primary">Explore food</Link>
+              <Link href="/chef/apply">Become a Chef</Link>
+              {user ? (
+                <Link href="/account" className="btn btn-primary">Account</Link>
+              ) : (
+                <Link href="/login" className="btn btn-primary">Sign in</Link>
+              )}
             </nav>
           </div>
         </header>

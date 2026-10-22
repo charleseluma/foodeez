@@ -12,7 +12,7 @@ export default function ExperienceScreen() {
   if (!e) {
     return (
       <View style={styles.missing}>
-        <Body>This experience isn't available.</Body>
+        <Body>This experience isn&apos;t available.</Body>
       </View>
     );
   }

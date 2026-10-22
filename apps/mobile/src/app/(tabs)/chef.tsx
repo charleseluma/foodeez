@@ -1,22 +1,69 @@
-import { experiences } from '@foodeez/shared';
+import { STATUS_COPY, experiences } from '@foodeez/shared';
+import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { ExperienceCard } from '@/components/experience-card';
-import { Body, Button, Eyebrow, Panel, Screen, Title } from '@/components/ui';
+import { Body, Button, Eyebrow, Screen, Title } from '@/components/ui';
 import { colors, fonts, spacing } from '@/constants/theme';
+import { useSession } from '@/lib/session';
 
-// Chef mode preview. Uses sample data until chef accounts are connected to the database.
+// Chef mode. Approved chefs see their kitchen; experiences are still sample data
+// until the Create Experience step (build plan step 3) is connected to the database.
 const SAMPLE_CHEF_SLUG = 'andre-williams';
 
 export default function ChefScreen() {
+  const { configured, loading, session, application } = useSession();
+
+  // Live accounts: show the right step until the person is an approved chef.
+  if (configured && !loading && application?.status !== 'approved') {
+    if (!session) {
+      return (
+        <Screen>
+          <Eyebrow>Chef mode</Eyebrow>
+          <Title>Cook for Foodeez.</Title>
+          <Body muted>
+            Host private dinners and tastings for guests in DC, Maryland and Virginia. Create an
+            account to apply.
+          </Body>
+          <Button label="Create an account" variant="accent" onPress={() => router.push('/sign-up')} />
+          <Button label="Sign in" variant="outline" onPress={() => router.push('/sign-in')} />
+        </Screen>
+      );
+    }
+    if (!application) {
+      return (
+        <Screen>
+          <Eyebrow>Chef mode</Eyebrow>
+          <Title>Cook for Foodeez.</Title>
+          <Body muted>
+            Chefs apply and are reviewed before they can sell seats, so guests can trust every table.
+          </Body>
+          <Button label="Apply to become a chef" variant="accent" onPress={() => router.push('/chef-apply')} />
+        </Screen>
+      );
+    }
+    const copy = STATUS_COPY[application.status];
+    return (
+      <Screen>
+        <Eyebrow>Chef mode</Eyebrow>
+        <Title>{copy.title}</Title>
+        <Body muted>{copy.body}</Body>
+        {application.status === 'pending' && (
+          <Button label="Edit application" variant="outline" onPress={() => router.push('/chef-apply')} />
+        )}
+      </Screen>
+    );
+  }
+
+  const live = configured && application?.status === 'approved';
   const mine = experiences.filter((e) => e.chefSlug === SAMPLE_CHEF_SLUG);
   const seatsLeft = mine.reduce((n, e) => n + e.seatsLeft, 0);
 
   return (
     <Screen>
-      <Eyebrow>Chef mode · Preview</Eyebrow>
+      <Eyebrow>{live ? 'Chef mode' : 'Chef mode · Preview'}</Eyebrow>
       <Title>Your kitchen</Title>
-      <Body muted>Create experiences, see who's coming, and manage your table.</Body>
+      <Body muted>Create experiences, see who&apos;s coming, and manage your table.</Body>
 
       <View style={styles.stats}>
         <Stat value={String(mine.length)} label="Upcoming" />
@@ -32,13 +79,6 @@ export default function ChefScreen() {
         <ExperienceCard key={e.slug} experience={e} />
       ))}
 
-      <Panel>
-        <Text style={styles.section}>Not a Foodeez chef yet?</Text>
-        <Body muted>
-          Chefs apply and are reviewed before they can sell seats, so guests can trust every table.
-        </Body>
-        <Button label="Apply to become a chef" variant="outline" disabled />
-      </Panel>
     </Screen>
   );
 }
